@@ -35,13 +35,13 @@ Channels response for a exoplanet simulation:
 
 Data/Model comparison for an exoplanet simulation
 
-![boo](./imagesflux_allchannels_nobackground_v3.png)
+![boo](./images/flux_allchannels_nobackground_v3.png)
 
 Data/Model comparison of differential null for an exoplanet simulation observed at 20 different hour angle position (full night of observation)
 
-![boo](./diff_channel_flux_nobackground_v3.png)
+![boo](./images/diff_channel_flux_nobackground_v3.png)
 
 Grid exploration of the position of an exoplanet
 
-![boo](./position_exploration_nobackground_v3.png)
+![boo](./images/position_exploration_nobackground_v3.png)
 
