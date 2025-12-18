@@ -22,13 +22,26 @@ This package is currently at a very early stage of development.
 At its current stage, **nimodeler** allows users to:
 
 - Load a single NIFITS file
-- Plot instrument responses for various channels:
-  - Photometric  
-  - Additive  
-  - Nulling
+- Plot instrument responses for various channels: Photometric, Additive or Nulling
 - Extract data from these channels
 - Extract the differential nulling channel, when available
 - Compute simulated data using an **oimodeler** model with the same instrument response
 - Perform data–model comparisons using a simple chi-squared method
 
+#Some plots from  **nimodeler** and some VLTI/NOTT simulated data
+
+Channels response for a exoplanet simulation:
 ![boo](./images/test_nobackground_v3_channels_responses.png)
+
+Data/Model comparison for an exoplanet simulation
+
+![boo](./imagesflux_allchannels_nobackground_v3.png)
+
+Data/Model comparison of differential null for an exoplanet simulation observed at 20 different hour angle position (full night of observation)
+
+![boo](./diff_channel_flux_nobackground_v3.png)
+
+Grid exploration of the position of an exoplanet
+
+![boo](./position_exploration_nobackground_v3.png)
+
