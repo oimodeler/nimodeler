@@ -16,14 +16,12 @@ from pathlib import Path
 from tqdm import tqdm
 
 
+dir0=Path(__file__).parents[1]
+dirdata=dir0 / "data"
+dirplot=dir0 / "images"
 
-dir0  =Path("C:\\Travail\\Instrumentation\\ASGARD\\NOTT\\nifits\\")
-fname = dir0 / 'nott_ut_planet_10_2.nifits'
-
-fname = dir0 / 'nobackground_v3.nifits'
-
-#fname = dir0 / 'nott_ut_planet_3_3.nifits'
-
+#fname = dir0 / 'nott_ut_planet_10_2.nifits'
+fname = dirdata / 'nobackground_v3.nifits'
 
 data=nim.nimData(fname)
 
@@ -34,7 +32,10 @@ resp = data.simultateResponse(dim, fov)
 
 #%% plot the field of view and trasnmission responses of the nuller
 fig_resp, ax_resp = data.plotResponse()
+fig_resp.savefig(dirplot / f"test_{fname.stem}_channels_responses.png")
+
 fig_fov, ax_fov = data.plotFov()
+fig_fov.savefig(dirplot / f"test_{fname.stem}_fov.png")
 
 
 #%% create star planet model with two blackbodies
@@ -90,19 +91,6 @@ star   = oim.oimPt(x=0,y=0,f=oim.oimInterp("wl",wl=wl,values=fstar.value))
 planet = oim.oimPt(x=x,y=y,f=oim.oimInterp("wl",wl=wl,values=fplanet.value))
 bckg   = oim.oimBackground(f=oim.oimInterp("wl",wl=wl,values=fback.value))
 model  = oim.oimModel(star,planet,bckg)
-sim  =nim.nimSimulator(data,model)
-sim.simulateData()
-
-fig, ax = sim.plot(10)
-
-isbackground = fback.min().value !=0
-
-if isbackground:
-    txtBckG=f"{Tback}"
-else:
-    txtBckG="None"
-
-fig.suptitle(f"{fname.name} - Bckg = {txtBckG}")
 
 #%%
 
@@ -115,26 +103,37 @@ ax.set_xlabel("wavelength ($\mu$m)")
 ax.set_ylabel("Flux (arbitrary unit)")
 ax.set_yscale("log")
 fig.suptitle(fname.name)
+fig.savefig(dirplot / f"flux_component_{fname.stem}.png")
 #%% plot the model
 pix = fov/dim
-model.showModel(dim,pix,wl=3.5e-6,normPow=0.1)
-
+fig,ax,im  = model.showModel(dim,pix,wl=3.5e-6,normPow=0.1)
+fig.savefig(dirplot / f"image_model0_{fname.stem}.png")
 #%% create the simulator cointaining the data and the model
 sim  =nim.nimSimulator(data,model)
 sim.simulateData()
 #%% plot a data/model comparison for one frame
+
 fig, ax = sim.plot(10)
-fig.suptitle(fname.name)
+
+isbackground = fback.min().value !=0
+
+if isbackground:
+    txtBckG=f"{Tback}"
+else:
+    txtBckG="None"
+
+fig.suptitle(f"{fname.name} - Bckg = {txtBckG}")
+fig.savefig(dirplot / f"flux_allchannels_{fname.stem}.png")
 #%% plot the differential data 
 fig,ax = plt.subplots(4,5,figsize=(16,10))
 ax = ax.flatten()
 for iFrame in range(sim.getData().shape[0]):
     _,_ = sim.plotDiffrential(iFrame,ax=ax[iFrame],showLabel=iFrame==0)
 fig.suptitle(fname.name)
-
+fig.savefig(dirplot / f"diff_channel_flux_{fname.stem}.png")
 
 #%%
-dim=21
+dim=41
 chi2map0 = np.ndarray((dim,dim))
 xy=np.linspace(-20,20,dim)
 
@@ -144,42 +143,24 @@ for i,x in enumerate(tqdm(xy)):
         planet.params['y'].value=y
         sim.simulateData()
 
-        chi2map0[i,j]=sim.computeChi2()[1]
+        chi2map0[j,i]=sim.computeChi2()[1]
 #%%
+dxy=np.gradient(xy)[0]/2*0
+
 chi2map0/=chi2map0.min()
 fig,ax=plt.subplots()
-cb=ax.imshow(chi2map0,extent=[xy[0],xy[-1],xy[0],xy[-1]],
-             interpolation="none",norm=colors.LogNorm())
+cb=ax.imshow(chi2map0,extent=[xy[0]-dxy,xy[-1]-dxy,xy[0]-dxy,xy[-1]]-dxy,
+             interpolation="None",norm=colors.LogNorm())
 plt.colorbar(cb,label="$\\chi^2_r$")
 ax.set_xlabel("$\\alpha$ [mas]")
-ax.set_ylabel("$\\beta$ [mas]")
-#%%
+ax.set_ylabel("$\\delta$ [mas]")
+
 xy0=np.where(chi2map0==chi2map0.min())
-x0=xy[xy0[0][0]]
-y0=xy[xy0[1][0]]
-#%%
-dim=21
-chi2map = np.ndarray((dim,dim))
-dxy=np.linspace(-1,1,dim)
-
-for i,dx in enumerate(tqdm(dxy)):
-    for j,dy in enumerate(dxy):
-        planet.params['x'].value=x0+dx
-        planet.params['y'].value=y0+dy
-        sim.simulateData()
-
-        chi2map[i,j]=sim.computeChi2()[1]
-#%%
-chi2map/=chi2map.min()
-fig,ax=plt.subplots()
-cb=ax.imshow(chi2map,extent=[dxy[0]+x0,dxy[-1]+x0,dxy[0]+y0,dxy[-1]+y0],
-             interpolation="none",norm=colors.LogNorm())
-
-cb=ax.imshow(chi2map)
-
-plt.colorbar(cb,label="$\\chi^2_r$")
-ax.set_xlabel("$\\alpha$ [mas]")
-ax.set_ylabel("$\\beta$ [mas]")
+x0=xy[xy0[1][0]]
+y0=xy[xy0[0][0]]
+ax.plot([xy[0],xy[-1]],[y0,y0],ls=":",color="r")
+ax.plot([x0,x0],[xy[0],xy[-1]],ls=":",color="r")
+fig.savefig(dirplot / f"position_exploration_{fname.stem}.png")
 
 
         
