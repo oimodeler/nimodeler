@@ -7,3 +7,6 @@ nimodeler
 Early Development](https://img.shields.io/badge/lifecycle-EarlyDevelopment-orange.svg)
 
 nimodeler is an experimental package to simulate nulling interferometry data compatible with the NIFITS format
+
+
+![boo](./images/test_nobackground_v3_channels_responses.png)
